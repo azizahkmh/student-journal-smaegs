@@ -400,6 +400,7 @@
                     <div class="form-row">
                         <div class="form-group"><label>Parent / Guardian</label><input type="text" id="f_parent" placeholder="Parent name" /></div>
                         <div class="form-group"><label>Contact Number</label><input type="text" id="f_contact" placeholder="Phone number" /></div>
+                        <div class="form-group"><label>Parent / Guardian Number</label><input type="text" id="f_prcontact" placeholder="Phone number" /></div>
                     </div>
                     <div class="form-row">
                         <div class="form-group"><label>Homeroom Teacher</label><input type="text" id="f_ht" placeholder="Homeroom teacher name" /></div>
@@ -729,6 +730,7 @@
         <tr><td><strong>Grade</strong></td><td id="exp_grade2">—</td></tr>
         <tr><td><strong>Parent/Guardian</strong></td><td id="exp_parent">—</td></tr>
         <tr><td><strong>Contact Number</strong></td><td id="exp_contact">—</td></tr>
+        <tr><td><strong>Parent / Guardian Number</strong></td><td id="exp_prcontact">—</td></tr>
     </table>
     </div>
 
@@ -1105,6 +1107,7 @@ const firebaseConfig = {
                     placeOfBirth: row["PLACE OF BIRTH"] || '',
                     dob: row["DATE OF BIRTH"] || '',
                     contact: row["PHONE NUMBER"] || '',
+                    prcontact: row["PHONE NUMBER"] || '',
                     parent: row["PARENTS' NAME"] || '',
                     homeroomTeacher: '',
                     academicAdvisor: '',
@@ -1199,6 +1202,7 @@ const firebaseConfig = {
                 dob: dob,
                 contact: phone,
                 parent: parent,
+                prcontact: phone,
                 homeroomTeacher: '',
                 academicAdvisor: '',
                 academicYear: '2025/2026',
@@ -1534,6 +1538,7 @@ const firebaseConfig = {
             document.getElementById('f_pob').value = rec.placeOfBirth || '';
             document.getElementById('f_parent').value = rec.parent || '';
             document.getElementById('f_contact').value = rec.contact || '';
+            document.getElementById('f_prcontact').value = rec.prcontact || '';
             document.getElementById('f_ht').value = rec.homeroomTeacher || '';
             document.getElementById('f_aa').value = rec.academicAdvisor || '';
             document.getElementById('f_year').value = rec.academicYear || '2025/2026';
@@ -1718,6 +1723,7 @@ const firebaseConfig = {
                 placeOfBirth: document.getElementById('f_pob').value.trim(),
                 parent: document.getElementById('f_parent').value.trim(),
                 contact: document.getElementById('f_contact').value.trim(),
+                prcontact: document.getElementById('f_prcontact').value.trim(),
                 homeroomTeacher: document.getElementById('f_ht').value.trim(),
                 academicAdvisor: document.getElementById('f_aa').value.trim(),
                 academicYear: document.getElementById('f_year').value.trim(),
@@ -2053,6 +2059,7 @@ const firebaseConfig = {
             setText('exp_grade2', r.grade);
             setText('exp_parent', r.parent);
             setText('exp_contact', r.contact);
+            setText('exp_prcontact', r.prcontact);
 
             // Page 2
             setText('exp_strengths', r.strengths);
