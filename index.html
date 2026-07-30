@@ -161,6 +161,9 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
+        /* Class group header in journal list */
+        .class-group-header {font-size: 1.1rem; font-weight: 700; color: #0f172a; margin: 1rem 0 0.5rem 0; padding-bottom: 0.3rem; border-bottom: 2px solid #e2e8f0;}
+
         /* ── Utilities ── */
         .mt-1 { margin-top: 1rem; }
         .mt-2 { margin-top: 2rem; }
@@ -332,14 +335,24 @@
         </section>
 
         <!-- ===== JOURNAL ===== -->
+        <!-- ===== JOURNAL ===== -->
         <section id="view-journal" class="view-content" style="display:none;">
             <div class="page-header">
-                <div><h1>Development Journal</h1><span class="sub">Full student development record</span></div>
-                <div class="page-actions">
-                    <button class="btn btn-outline" onclick="navigateTo('students')"><i class="fas fa-edit"></i> New Entry</button>
-                    <button class="btn btn-success" onclick="exportJournalPDF()"><i class="fas fa-file-pdf"></i> Export PDF</button>
-                </div>
-            </div>
+                 <div><h1>Development Journal</h1><span class="sub">Full student development record</span></div>
+                    <div class="page-actions">
+                     <button class="btn btn-outline" onclick="navigateTo('students')"><i class="fas fa-edit"></i> New Entry</button>
+                        <button class="btn btn-success" onclick="exportJournalPDF()"><i class="fas fa-file-pdf"></i> Export PDF</button>
+                 </div>
+             </div>
+            <!-- Class Filter -->
+             <div class="form-row" style="max-width:300px; margin-bottom:1rem;">
+                 <div class="form-group">
+                 <label for="journalClassFilter">Filter by Class</label>
+                    <select id="journalClassFilter" onchange="renderJournalList()">
+                        <option value="">All Classes</option>
+                  </select>
+             </div>
+         </div>
             <div id="journalList"><div class="empty-state"><i class="fas fa-book-open"></i><h4>No journal entries</h4><p class="text-muted">Import CSV or add students to start journaling.</p></div></div>
         </section>
 
@@ -1272,6 +1285,7 @@ const firebaseConfig = {
             renderJournalList();
             populateReportSelect();
             renderBestStudents();
+            populateClassFilter();
             const currentView = document.querySelector('.sidebar-nav a.active')?.dataset?.view || 'dashboard';
             document.querySelectorAll('.view-content').forEach(el => el.style.display = 'none');
             const target = document.getElementById('view-' + currentView);
@@ -1393,30 +1407,71 @@ const firebaseConfig = {
         // ─── JOURNAL LIST ───
         function renderJournalList() {
             const container = document.getElementById('journalList');
-            const list = Object.values(allStudents);
-            if (list.length === 0) {
-                container.innerHTML =
-                    `<div class="empty-state"><i class="fas fa-book-open"></i><h4>No journal entries</h4><p class="text-muted">Import CSV or add students to start journaling.</p></div>`;
-                return;
+            const filterClass = document.getElementById('journalClassFilter').value;
+    
+            // Get all students, filter by class if selected
+            let list = Object.values(allStudents);
+            if (filterClass) {
+                list = list.filter(r => r.grade === filterClass);
+
             }
-            const sorted = list.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-            container.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;">
-                ${sorted.map(r => `
-                    <div style="background:#fff;border-radius:14px;border:1px solid #edf2f7;padding:1.2rem;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+    
+            if (list.length === 0) {
+                container.innerHTML = `<div class="empty-state"><i class="fas fa-book-open"></i><h4>No journal entries</h4><p class="text-muted">Import CSV or add students to start journaling.</p></div>`;
+                return;
+             }
+    
+            // Group by class
+            const groups = {};
+            list.forEach(r => {
+            const cls = r.grade || 'Unknown';
+                 if (!groups[cls]) groups[cls] = [];
+                     groups[cls].push(r);
+            });
+    
+    
+         // Sort classes alphabetically
+         const sortedClasses = Object.keys(groups).sort();
+    
+             let html = '';
+                sortedClasses.forEach(cls => {
+                  const students = groups[cls].sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+                  html += `<div class="class-group-header">📚 ${cls}</div>`;
+                  html += `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;margin-bottom:1.5rem;">`;
+                  students.forEach(r => {
+                  html += `
+                     <div style="background:#fff;border-radius:14px;border:1px solid #edf2f7;padding:1.2rem;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
                         <div style="display:flex;justify-content:space-between;align-items:start;">
-                            <div><strong style="font-size:1.05rem;">${r.studentName}</strong><br /><span class="text-muted text-sm">${r.grade} · ${r.studentId || 'N/A'}</span></div>
-                            <span class="badge ${getOverallBadge(r)}">${getOverallLabel(r)}</span>
+                        <div><strong style="font-size:1.05rem;">${r.studentName}</strong><br /><span class="text-muted text-sm">${r.grade} · ${r.studentId || 'N/A'}</span></div>
+                        <span class="badge ${getOverallBadge(r)}">${getOverallLabel(r)}</span>
                         </div>
                         <div class="text-muted text-sm mt-1">${r.homeroomTeacher ? 'HT: ' + r.homeroomTeacher : ''}</div>
                         <div style="margin-top:0.75rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
                             <button class="btn btn-primary btn-xs" onclick="openJournalModal('${r.studentId}')"><i class="fas fa-edit"></i> Edit</button>
-                            <button class="btn btn-outline btn-xs" onclick="viewStudentReport('${r.studentId}')"><i class="fas fa-file-alt"></i> Report</button>
-                            <button class="btn btn-success btn-xs" onclick="exportSinglePDF('${r.studentId}')"><i class="fas fa-file-pdf"></i> PDF</button>
+                             <button class="btn btn-outline btn-xs" onclick="viewStudentReport('${r.studentId}')"><i class="fas fa-file-alt"></i> Report</button>
+                         <button class="btn btn-success btn-xs" onclick="exportSinglePDF('${r.studentId}')"><i class="fas fa-file-pdf"></i> PDF</button>
                         </div>
-                        <div class="text-muted text-xs" style="margin-top:0.5rem;">Updated: ${new Date(r.updatedAt).toLocaleDateString()}</div>
-                    </div>
-                `).join('')}
-            </div>`;
+                     <div class="text-muted text-xs" style="margin-top:0.5rem;">Updated: ${new Date(r.updatedAt).toLocaleDateString()}</div>
+                 </div>
+            `  ;
+                 });
+              html += `</div>`;
+            });
+    
+             container.innerHTML = html;
+        }
+
+        function populateClassFilter() {
+         const sel = document.getElementById('journalClassFilter');
+         const current = sel.value;
+         // Get unique classes
+         const classes = new Set();
+         Object.values(allStudents).forEach(r => {
+             if (r.grade) classes.add(r.grade);
+            });
+         const sorted = Array.from(classes).sort();
+            sel.innerHTML = '<option value="">All Classes</option>' + 
+              sorted.map(c => `<option value="${c}" ${c === current ? 'selected' : ''}>${c}</option>`).join('');
         }
 
         function getOverallBadge(r) {
