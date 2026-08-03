@@ -430,13 +430,13 @@
 
                 <!-- ===== TAB: Profile ===== -->
                 <div class="tab-content" id="tab-profile">
-                    <div class="section-title"><i class="fas fa-address-card"></i> Student Profile</div>
+                    <div class="section-title"><i class="fas fa-address-card"></i> Student Profile <span class="section-sub">(Completed by CT)</span></div>
                     <div class="form-group"><label>Learning Strengths</label><textarea id="f_strengths" rows="2" placeholder="List key learning strengths..."></textarea></div>
                     <div class="form-group"><label>Areas for Development</label><textarea id="f_areas" rows="2" placeholder="Areas needing improvement..."></textarea></div>
                     <div class="form-group"><label>Learning Preferences</label><textarea id="f_preferences" rows="2" placeholder="Preferred learning styles, formats..."></textarea></div>
                     <div class="form-group"><label>Additional Support Required</label><textarea id="f_support" rows="2" placeholder="Any extra support needed..."></textarea></div>
                     <hr style="margin:1rem 0;border-color:#edf2f7;" />
-                    <div class="section-title"><i class="fas fa-bullseye"></i> Career & Major</div>
+                    <div class="section-title"><i class="fas fa-bullseye"></i> Career & Major <span class="section-sub">(Completed by AA)</span></div>
                     <!-- NEW MONTH DROPDOWN -->
                     <div class="form-row">
                         <div class="form-group">
@@ -464,7 +464,7 @@
 
                 <!-- ===== TAB: Academic ===== -->
                 <div class="tab-content" id="tab-academic">
-                    <div class="section-title"><i class="fas fa-chart-line"></i> Academic Progress</div>
+                    <div class="section-title"><i class="fas fa-chart-line"></i> Academic Progress <span class="section-sub">(Completed by AA)</span></div>
                     <p class="text-muted mb-1">Enter scores for each subject (0–100).</p>
                     <div class="form-row-3" id="academicSubjects"></div>
                     <div class="form-group"><label>Academic Average</label><input type="text" id="ac_avg" readonly style="background:#f1f5f9;font-weight:600;" value="—" /></div>
@@ -473,7 +473,7 @@
 
                 <!-- ===== TAB: Character ===== -->
                 <div class="tab-content" id="tab-character">
-                    <div class="section-title"><i class="fas fa-heart"></i> Character Building</div>
+                    <div class="section-title"><i class="fas fa-heart"></i> Character Building <span class="section-sub">(Completed by HT)</span></div>
                     <div class="char-grid" id="charGrid">
                         <div class="char-item"><div class="char-name">5S</div><div class="char-area">Senyum, Salam, Sapa, Sopan, Santun</div><div class="char-radio" data-char="char_5s"><label><input type="radio" name="char_5s" value="4" /> Excellent</label><label><input type="radio" name="char_5s" value="3" /> Good</label><label><input type="radio" name="char_5s" value="2" /> Developing</label><label><input type="radio" name="char_5s" value="1" /> Needs Support</label></div></div>
                         <div class="char-item"><div class="char-name">Integrity</div><div class="char-area">Honesty</div><div class="char-radio" data-char="char_honesty"><label><input type="radio" name="char_honesty" value="4" /> Excellent</label><label><input type="radio" name="char_honesty" value="3" /> Good</label><label><input type="radio" name="char_honesty" value="2" /> Developing</label><label><input type="radio" name="char_honesty" value="1" /> Needs Support</label></div></div>
@@ -498,7 +498,7 @@
 
                 <!-- ===== TAB: Talent ===== -->
                 <div class="tab-content" id="tab-talent">
-                    <div class="section-title"><i class="fas fa-star"></i> Talent Development</div>
+                    <div class="section-title"><i class="fas fa-star"></i> Talent Development <span class="section-sub">(Completed by HT)</span></div>
                     <div class="talent-grid">
                         <div class="talent-item"><div class="talent-label">Club Participation & Commitment</div><div class="talent-radio" data-talent="talent_club"><label><input type="radio" name="talent_club" value="4" /> Excellent</label><label><input type="radio" name="talent_club" value="3" /> Good</label><label><input type="radio" name="talent_club" value="2" /> Developing</label><label><input type="radio" name="talent_club" value="1" /> Needs Improv.</label></div></div>
                         <div class="talent-item"><div class="talent-label">Competition Participation</div><div class="talent-radio" data-talent="talent_comp"><label><input type="radio" name="talent_comp" value="4" /> Excellent</label><label><input type="radio" name="talent_comp" value="3" /> Good</label><label><input type="radio" name="talent_comp" value="2" /> Developing</label><label><input type="radio" name="talent_comp" value="1" /> Needs Improv.</label></div></div>
@@ -507,7 +507,7 @@
                     </div>
                     <div class="form-group mt-1"><label>Talent Average Score</label><input type="text" id="talentAvg" readonly style="background:#f1f5f9;font-weight:600;" value="—" /></div>
                     <hr style="margin:1rem 0;border-color:#edf2f7;" />
-                    <div class="section-title"><i class="fas fa-trophy"></i> Talent Achievements</div>
+                    <div class="section-title"><i class="fas fa-trophy"></i> Talent Achievements <span class="section-sub">(Completed by HT)</span></div>
                     <div class="form-row-3">
                         <div class="form-group"><label>Improved technical skills</label>
                             <div class="inline-check" style="flex-direction:column;align-items:flex-start;gap:4px;">
@@ -539,33 +539,33 @@
                         </div>
                     </div>
                     <div class="form-row">
-                        <div class="form-group"><label>Achievement 1 (Best Student)</label><input type="text" id="t_ach1" placeholder="e.g. Best Student of the Month" /></div>
-                        <div class="form-group"><label>Achievement 2 (Best English Speaker)</label><input type="text" id="t_ach2" placeholder="e.g. English Speech Winner" /></div>
+                        <div class="form-group"><label>Achievement 1</label><input type="text" id="t_ach1" placeholder="e.g. Best Student of the Month" /></div>
+                        <div class="form-group"><label>Achievement 2</label><input type="text" id="t_ach2" placeholder="e.g. English Speech Winner" /></div>
                     </div>
                     <div class="form-row">
-                        <div class="form-group"><label>Achievement 3 (Competitions)</label><input type="text" id="t_ach3" placeholder="e.g. Science Olympiad" /></div>
-                        <div class="form-group"><label>Achievement 4 (Organization)</label><input type="text" id="t_ach4" placeholder="e.g. Student Council" /></div>
+                        <div class="form-group"><label>Achievement 3</label><input type="text" id="t_ach3" placeholder="e.g. Science Olympiad" /></div>
+                        <div class="form-group"><label>Achievement 4</label><input type="text" id="t_ach4" placeholder="e.g. Student Council" /></div>
                     </div>
                     <div class="form-row">
-                        <div class="form-group"><label>Achievement 5 (Seminar/Workshop)</label><input type="text" id="t_ach5" placeholder="e.g. Leadership Workshop" /></div>
-                        <div class="form-group"><label>Achievement 6 (Other)</label><input type="text" id="t_ach6" placeholder="Other achievements" /></div>
+                        <div class="form-group"><label>Achievement 5</label><input type="text" id="t_ach5" placeholder="e.g. Leadership Workshop" /></div>
+                        <div class="form-group"><label>Achievement 6</label><input type="text" id="t_ach6" placeholder="Other achievements" /></div>
                     </div>
                 </div>
 
                 <!-- ===== TAB: Observations ===== -->
                 <div class="tab-content" id="tab-observations">
-                    <div class="section-title"><i class="fas fa-clipboard-list"></i> Teacher's Observations</div>
-                    <div class="form-group"><label>Strengths Demonstrated</label><textarea id="f_strengths_obs" rows="3" placeholder="• Strong analytical skills&#10;• Excellent teamwork"></textarea></div>
-                    <div class="form-group"><label>Areas Requiring Improvement</label><textarea id="f_improve_obs" rows="3" placeholder="• Time management&#10;• Focus during class"></textarea></div>
-                    <div class="form-group"><label>Interventions/Support Provided</label><textarea id="f_interventions" rows="2" placeholder="Extra tutoring, counselling, etc."></textarea></div>
+                    <div class="section-title"><i class="fas fa-clipboard-list"></i> Teacher's Observations <span class="section-sub">(Completed by AA, HT and CT)</span></div>
+                    <div class="form-group"><label>Strengths Demonstrated (Completed by HT & AA)</label><textarea id="f_strengths_obs" rows="3" placeholder="• Strong analytical skills&#10;• Excellent teamwork"></textarea></div>
+                    <div class="form-group"><label>Areas Requiring Improvement (Completed by HT & AA)</label><textarea id="f_improve_obs" rows="3" placeholder="• Time management&#10;• Focus during class"></textarea></div>
+                    <div class="form-group"><label>Interventions/Support Provided (Completed by HT, AA and CT)</label><textarea id="f_interventions" rows="2" placeholder="Extra tutoring, counselling, etc."></textarea></div>
                     <hr style="margin:1rem 0;border-color:#edf2f7;" />
-                    <div class="section-title"><i class="fas fa-phone"></i> Parent Communication</div>
+                    <div class="section-title"><i class="fas fa-phone"></i> Parent Communication <span class="section-sub">(Completed by HT)</span></div>
                     <div class="form-row-3">
                         <div class="form-group"><label>Date</label><input type="date" id="pc_date" /></div>
                         <div class="form-group"><label>Method</label><input type="text" id="pc_method" placeholder="e.g. Phone, Meeting, Email" /></div>
                         <div class="form-group"><label>Summary</label><input type="text" id="pc_summary" placeholder="Discussion summary" /></div>
                     </div>
-                    <div class="form-group"><label>Action Plan for Next Month</label><textarea id="f_action_plan" rows="2" placeholder="Plan for next month's development..."></textarea></div>
+                    <div class="form-group"><label>Action Plan for Next Month (Completed by HT, AA and CT)</label><textarea id="f_action_plan" rows="2" placeholder="Plan for next month's development..."></textarea></div>
                 </div>
 
                 <!-- ===== TAB: Terms ===== -->
@@ -574,14 +574,14 @@
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
                         <div style="background:#f8fafc;border-radius:12px;padding:1rem;border:1px solid #e2e8f0;">
                             <h4 style="margin-bottom:0.5rem;">📖 Odd Term</h4>
-                            <div class="form-group"><label>Academic Performance</label><textarea id="term_odd_academic" rows="2" placeholder="Scores, progress..."></textarea></div>
-                            <div class="form-group"><label>Talent Development</label><textarea id="term_odd_talent" rows="2" placeholder="Talent growth..."></textarea></div>
-                            <div class="form-group"><label>Character Building</label><textarea id="term_odd_char" rows="2" placeholder="Character observations..."></textarea></div>
+                            <div class="form-group"><label>Academic Performance (AA)</label><textarea id="term_odd_academic" rows="2" placeholder="Scores, progress..."></textarea></div>
+                            <div class="form-group"><label>Talent Development (HT)</label><textarea id="term_odd_talent" rows="2" placeholder="Talent growth..."></textarea></div>
+                            <div class="form-group"><label>Character Building (HT)</label><textarea id="term_odd_char" rows="2" placeholder="Character observations..."></textarea></div>
                             <div class="form-row"><div class="form-group"><label>Present</label><input type="number" id="term_odd_present" placeholder="0" /></div><div class="form-group"><label>Absent</label><input type="number" id="term_odd_absent" placeholder="0" /></div><div class="form-group"><label>Late</label><input type="number" id="term_odd_late" placeholder="0" /></div></div>
-                            <div class="form-group"><label>Overall Assessment</label><select id="term_odd_assessment"><option value="">— Select —</option><option value="Excellent">Excellent Progress</option><option value="Good">Good Progress</option><option value="Satisfactory">Satisfactory Progress</option><option value="Needs Support">Needs Additional Support</option></select></div>
-                            <div class="form-group"><label>Recommended Interventions</label><div class="inline-check"><label><input type="checkbox" value="Extra Academic Support" /> Extra Academic Support</label><label><input type="checkbox" value="Behaviour Monitoring" /> Behaviour Monitoring</label><label><input type="checkbox" value="Counselling" /> Counselling</label><label><input type="checkbox" value="Parent Conference" /> Parent Conference</label><label><input type="checkbox" value="Peer Support" /> Peer Support</label><label><input type="checkbox" value="Individual Learning Plan" /> Individual Learning Plan</label></div></div>
+                            <div class="form-group"><label>Counselling Teacher's Overall Assessment</label><select id="term_odd_assessment"><option value="">— Select —</option><option value="Excellent">Excellent Progress</option><option value="Good">Good Progress</option><option value="Satisfactory">Satisfactory Progress</option><option value="Needs Support">Needs Additional Support</option></select></div>
+                            <div class="form-group"><label>Recommended Interventions by Counselling Teacher</label><div class="inline-check"><label><input type="checkbox" value="Extra Academic Support" /> Extra Academic Support</label><label><input type="checkbox" value="Behaviour Monitoring" /> Behaviour Monitoring</label><label><input type="checkbox" value="Counselling" /> Counselling</label><label><input type="checkbox" value="Parent Conference" /> Parent Conference</label><label><input type="checkbox" value="Peer Support" /> Peer Support</label><label><input type="checkbox" value="Individual Learning Plan" /> Individual Learning Plan</label></div></div>
                             <div class="form-group">
-                                <label>Parent Meeting Record</label>
+                                <label>Parent Meeting Record (HT/AA/CT)</label>
                                 <div class="form-row">
                                     <div class="form-group"><label>Date</label><input type="date" id="term_odd_meet_date" /></div>
                                     <div class="form-group"><label>Key Points</label><textarea id="term_odd_meet_points" rows="2" placeholder="Discussion points"></textarea></div>
@@ -591,14 +591,14 @@
                         </div>
                         <div style="background:#f8fafc;border-radius:12px;padding:1rem;border:1px solid #e2e8f0;">
                             <h4 style="margin-bottom:0.5rem;">📖 Even Term</h4>
-                            <div class="form-group"><label>Academic Performance</label><textarea id="term_even_academic" rows="2" placeholder="Scores, progress..."></textarea></div>
-                            <div class="form-group"><label>Talent Development</label><textarea id="term_even_talent" rows="2" placeholder="Talent growth..."></textarea></div>
-                            <div class="form-group"><label>Character Building</label><textarea id="term_even_char" rows="2" placeholder="Character observations..."></textarea></div>
+                            <div class="form-group"><label>Academic Performance (AA)</label><textarea id="term_even_academic" rows="2" placeholder="Scores, progress..."></textarea></div>
+                            <div class="form-group"><label>Talent Development (HT)</label><textarea id="term_even_talent" rows="2" placeholder="Talent growth..."></textarea></div>
+                            <div class="form-group"><label>Character Building (HT)</label><textarea id="term_even_char" rows="2" placeholder="Character observations..."></textarea></div>
                             <div class="form-row"><div class="form-group"><label>Present</label><input type="number" id="term_even_present" placeholder="0" /></div><div class="form-group"><label>Absent</label><input type="number" id="term_even_absent" placeholder="0" /></div><div class="form-group"><label>Late</label><input type="number" id="term_even_late" placeholder="0" /></div></div>
                             <div class="form-group"><label>Counselling Teacher's Overall Assessment</label><select id="term_even_assessment"><option value="">— Select —</option><option value="Excellent">Excellent Progress</option><option value="Good">Good Progress</option><option value="Satisfactory">Satisfactory Progress</option><option value="Needs Support">Needs Additional Support</option></select></div>
                             <div class="form-group"><label>Recommended Interventions by Counselling Teacher</label><div class="inline-check"><label><input type="checkbox" value="Extra Academic Support" /> Extra Academic Support</label><label><input type="checkbox" value="Behaviour Monitoring" /> Behaviour Monitoring</label><label><input type="checkbox" value="Counselling" /> Counselling</label><label><input type="checkbox" value="Parent Conference" /> Parent Conference</label><label><input type="checkbox" value="Peer Support" /> Peer Support</label><label><input type="checkbox" value="Individual Learning Plan" /> Individual Learning Plan</label></div></div>
                             <div class="form-group">
-                                <label>Parent Meeting Record</label>
+                                <label>Parent Meeting Record (HT/AA/CT) </label>
                                 <div class="form-row">
                                     <div class="form-group"><label>Date</label><input type="date" id="term_even_meet_date" /></div>
                                     <div class="form-group"><label>Key Points</label><textarea id="term_even_meet_points" rows="2" placeholder="Discussion points"></textarea></div>
@@ -611,10 +611,10 @@
 
                 <!-- ===== TAB: Year End ===== -->
                 <div class="tab-content" id="tab-year">
-                    <div class="section-title"><i class="fas fa-flag-checkered"></i> End-of-Year Summary</div>
-                    <div class="form-group"><label>Major Achievements</label><textarea id="f_year_achievements" rows="2" placeholder="List major achievements this year..."></textarea></div>
-                    <div class="form-group"><label>Significant Areas of Growth</label><textarea id="f_year_growth" rows="2" placeholder="Key areas where student grew..."></textarea></div>
-                    <div class="form-group"><label>Recommendations for Next Grade</label><textarea id="f_year_recommend" rows="2" placeholder="Recommendations for next grade level..."></textarea></div>
+                    <div class="section-title"><i class="fas fa-flag-checkered"></i> End-of-Year Summary <span class="section-sub">(Completed by AA, HT and CT)</span></div>
+                    <div class="form-group"><label>Major Achievements (HT & AA)</label><textarea id="f_year_achievements" rows="2" placeholder="List major achievements this year..."></textarea></div>
+                    <div class="form-group"><label>Significant Areas of Growth (HT, AA, CT)</label><textarea id="f_year_growth" rows="2" placeholder="Key areas where student grew..."></textarea></div>
+                    <div class="form-group"><label>Recommendations for Next Grade (CT)</label><textarea id="f_year_recommend" rows="2" placeholder="Recommendations for next grade level..."></textarea></div>
                     <hr style="margin:1rem 0;border-color:#edf2f7;" />
                     <div class="section-title"><i class="fas fa-pen-fancy"></i> Signatures</div>
                     
