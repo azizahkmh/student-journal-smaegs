@@ -998,7 +998,31 @@ const firebaseConfig = {
             try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }
         }
 
-        function saveToLocal(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+        function saveToLocal(data) {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                console.log('✅ localStorage updated successfully.');
+            } catch (e) {
+                console.error('❌ localStorage write error:', e);
+                toast('Failed to save data locally. Your browser storage may be full.', 'error');
+            }
+        }
+
+        function saveToFirebase(studentId, data) {
+            if (!db) return;
+            try {
+                const ref = getStudentsRef();
+                if (ref) {
+                    ref.child(studentId).set(data);
+                    console.log('✅ Firebase updated for student:', studentId);
+            } else {
+                    console.warn('⚠️ Firebase reference not available.');
+            }
+        } catch (e) {
+                console.error('❌ Firebase write error:', e);
+                // Don't throw; we already saved locally.
+        }
+    }
 
         function mergeData(firebaseData) {
             const localData = loadFromLocal();
@@ -1633,8 +1657,12 @@ const firebaseConfig = {
         }
 
         function collectFormData() {
-            const studentId = document.getElementById('f_id').value.trim();
-            if (!studentId) { toast('Student ID is required.', 'error'); return null; }
+            let studentId = document.getElementById('f_id').value.trim();
+            // If no ID, generate a temporary one (should not happen if user adds via Students tab)
+            if (!studentId) {
+                studentId = 'TEMP_' + Date.now();
+                console.warn('⚠️ No Student ID provided, generated temporary:', studentId);
+            }
 
             const char = {};
             document.querySelectorAll('.char-radio input[type="radio"]:checked').forEach(el => {
@@ -1770,28 +1798,68 @@ const firebaseConfig = {
 
         function saveJournal(e) {
             e.preventDefault();
-            const data = collectFormData();
-            if (!data) return;
-            const studentId = data.studentId;
-            if (!allStudents[studentId] && !document.getElementById('editId').value) {
-                if (allStudents[studentId]) { toast('Student ID already exists.', 'error'); return; }
-            }
-            const existing = allStudents[studentId] || {};
-            const updated = {
-                ...existing,
-                ...data,
-                studentId: studentId,
-                updatedAt: new Date().toISOString()
-            };
-            if (!existing.createdAt) updated.createdAt = new Date().toISOString();
-            allStudents[studentId] = updated;
-            saveToLocal(allStudents);
-            if (db) saveToFirebase(studentId, updated);
-            toast('Record saved successfully!', 'success');
-            closeModal();
-            renderAll();
-        }
+            console.log('🔄 saveJournal: Started');
+            try {
+                const data = collectFormData();
+                console.log('📦 Form data collected:', data);
+                if (!data) {
+                    console.warn('⚠️ collectFormData returned null');
+                    toast('Form data is incomplete. Please fill all required fields.', 'error');
+                    return;
+                } 
+        
+                const studentId = data.studentId;
+                if (!studentId) {
+                console.warn('⚠️ No student ID provided');
+                toast('Student ID is required. Please enter a valid ID.', 'error');
+                return;
+                }
 
+                // Check if student exists or is new
+                const isNew = !allStudents[studentId] && !document.getElementById('editId').value;
+                if (isNew && allStudents[studentId]) {
+                console.warn('⚠️ Student ID already exists:', studentId);
+                toast('Student ID already exists. Please use a unique ID.', 'error');
+                return;
+                }
+
+                // Build updated object
+                const existing = allStudents[studentId] || {};
+                const updated = {
+                    ...existing,
+                    ...data,
+                    studentId: studentId,
+                    updatedAt: new Date().toISOString()
+                };
+                if (!existing.createdAt) updated.createdAt = new Date().toISOString();
+
+                // Save to localStorage (primary)
+                allStudents[studentId] = updated;
+                saveToLocal(allStudents);
+                console.log('✅ Data saved to localStorage for ID:', studentId);
+
+                // Save to Firebase (if configured)
+                if (db) {
+                    try {
+                        saveToFirebase(studentId, updated);
+                        console.log('✅ Data pushed to Firebase for ID:', studentId);
+                    } catch (firebaseError) {
+                        console.warn('⚠️ Firebase save error (data still saved locally):', firebaseError);
+                        toast('Data saved locally, but Firebase sync failed. Check your Firebase configuration.', 'warning');
+                    }
+                } else {
+                    console.log('ℹ️ Firebase not configured, using localStorage only.');
+                }
+
+                toast('Record saved successfully!', 'success');
+                closeModal();
+                renderAll();
+            } catch (error) {
+                console.error('❌ Error in saveJournal:', error);
+                toast('Failed to save: ' + error.message, 'error');
+            }
+        }
+      
         function deleteRecord() {
             const id = document.getElementById('f_id').value.trim();
             if (!id || !allStudents[id]) return;
