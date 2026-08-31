@@ -918,26 +918,27 @@ const firebaseConfig = {
         const SUBJECTS = [
             { id: 'rel_character', label: 'Education of Religion and Character' },
             { id: 'civic', label: 'Civic Education' },
+            { id: 'national_language', label: 'National Language' },
             { id: 'math', label: 'Mathematics' },
             { id: 'math_ext', label: 'Extended Mathematics' },
             { id: 'sat_math', label: 'SAT Mathematics' },
-            { id: 'national_language', label: 'National Language' },
+            { id: 'history_indonesia', label: 'History of Indonesia' },
             { id: 'anthropology', label: 'Anthropology' },
             { id: 'eng', label: 'English' },
             { id: 'ceq', label: 'CEQ' },
             { id: 'sat_eng', label: 'SAT English' },
+            { id: 'art_culture', label: 'Art and Culture' },
+            { id: 'pe', label: 'Physical Education' },
             { id: 'mandarin', label: 'Mandarin' },
+            { id: 'sundanese', label: 'Sundanese'},
+            { id: 'arabic', label: 'Arabic'},
             { id: 'ict', label: 'ICT' },
-            { id: 'physics', label: 'Physics' },
-            { id: 'chemistry', label: 'Chemistry' },
-            { id: 'history_indonesia', label: 'History of Indonesia' },
             { id: 'biology', label: 'Biology' },
-            { id: 'history_world', label: 'History of World' },
+            { id: 'physics', label: 'Physics' },
+            { id: 'chemistry', label: 'Chemistry' },        
             { id: 'sociology', label: 'Sociology' },
             { id: 'economics', label: 'Economics' },
-            { id: 'geography', label: 'Geography' },
-            { id: 'pe', label: 'Physical Education' },
-            { id: 'art_culture', label: 'Art and Culture' },
+            { id: 'geography', label: 'Geography' },          
             { id: 'tahsin', label: 'Tahsin/Tahfidz' },
             { id: 'pu', label: 'PU' },
             { id: 'pk', label: 'PK' }
@@ -996,6 +997,10 @@ const firebaseConfig = {
 
         function loadFromLocal() {
             try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }
+
+
+
+            
         }
 
         function saveToLocal(data) {
@@ -1004,7 +1009,6 @@ const firebaseConfig = {
                 console.log('✅ localStorage updated successfully.');
             } catch (e) {
                 console.error('❌ localStorage write error:', e);
-                toast('Failed to save data locally. Your browser storage may be full.', 'error');
             }
         }
 
