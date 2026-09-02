@@ -815,7 +815,7 @@
                 <tbody id="exp_goal_rows"></tbody>
             </table>
             <table style="margin-top:5px;">
-                <thead><tr><th style="width:5%;">No.</th><th style="width:60%;">Achievement</th></tr></thead>
+                <thead><tr><th style="width:5%;">No.</th><th style="width:95%;">Achievement</th></tr></thead>
                 <tbody id="exp_ach_rows"></tbody>
             </table>
         </div>
@@ -2227,10 +2227,7 @@ const firebaseConfig = {
             document.getElementById('exp_goal_rows').innerHTML = goalRowsHTML;
 
             // Achievements
-            const ach = talentMap.achievements || {};
-            const achLabels = ['Best Student', 'Best English Speaker', 'Competitions', 'Organization', 'Seminar/Workshop',
-                'Other'
-            ];
+            const ach = talentMap.achievements || {};            
             let achRowsHTML = '';
             ['ach1', 'ach2', 'ach3', 'ach4', 'ach5', 'ach6'].forEach((a, idx) => {
                 achRowsHTML += `<tr><td>${idx+1}</td><td>${achLabels[idx]}</td><td>${ach[a] || '—'}</td></tr>`;
