@@ -2227,7 +2227,10 @@ const firebaseConfig = {
             document.getElementById('exp_goal_rows').innerHTML = goalRowsHTML;
 
             // Achievements
-            const ach = talentMap.achievements || {};            
+            const ach = talentMap.achievements || {}; 
+            const achLabels = ['Achievement 1', 'Achievement 2', 'Achievement 3', 'Achievement 4', 'Achievement 5',
+                'Achievement 6'
+            ];
             let achRowsHTML = '';
             ['ach1', 'ach2', 'ach3', 'ach4', 'ach5', 'ach6'].forEach((a, idx) => {
                 achRowsHTML += `<tr><td>${idx+1}</td><td>${achLabels[idx]}</td><td>${ach[a] || '—'}</td></tr>`;
