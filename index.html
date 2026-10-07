@@ -2087,278 +2087,502 @@ const firebaseConfig = {
             return 'D';
         }
 
-        function generatePDF(studentId) {
-            const r = allStudents[studentId];
-            if (!r) { toast('Student not found.', 'error'); return; }
+        // ─── PDF HELPERS (Google Docs-style rendering) ─────────────
 
-            const exp = document.getElementById('export-template');
-            const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '—'; };
-            const setHTML = (id, val) => { const el = document.getElementById(id); if (el) el.innerHTML = val || '—'; };
+        // Page constants (A4 in mm)
+        const PDF_MARGIN = 20;
+        const PDF_PAGE_WIDTH = 210;
+        const PDF_PAGE_HEIGHT = 297;
+        const PDF_CONTENT_WIDTH = PDF_PAGE_WIDTH - (PDF_MARGIN * 2);
 
-            // Page 1
-            setText('exp_year', r.academicYear || '________');
-            setText('exp_grade', r.grade || '________');
-            setText('exp_ht', r.homeroomTeacher || '________');
-            setText('exp_aa', r.academicAdvisor || '________');
-            setText('exp_name', r.studentName);
-            setText('exp_id', r.studentId);
-            setText('exp_dob', r.dob);
-            setText('exp_grade2', r.grade);
-            setText('exp_parent', r.parent);
-            setText('exp_contact', r.contact);            
+        // Track current Y position
+        let pdfY = PDF_MARGIN;
 
-            // Page 2
-            setText('exp_strengths', r.strengths);
-            setText('exp_areas', r.areas);
-            setText('exp_preferences', r.preferences);
-            setText('exp_support', r.support);
-
-            // Page 3 - Month from dropdown
-            setText('exp_month', r.month || 'July 2026');
-            setText('exp_career', r.career);
-            setText('exp_major', r.major);
-
-            // Page 4: Academic - show letter grades
-            const ac = r.academic || {};
-            const rows = SUBJECTS.map(subj => {
-                const score = ac[subj.id] || '';
-                const grade = gradeLetter(score);
-                return `<tr><td>${subj.label}</td><td>${grade}</td></tr>`;
-            }).join('');
-            document.getElementById('exp_academic_rows').innerHTML = rows;
-            setText('exp_ac_notes', ac.notes || '—');
-
-            // Page 5: Character
-            const charMap = r.character || {};
-            const charKeys = ['char_5s', 'char_honesty', 'char_obedience', 'char_cheating', 'char_attendance',
-                'char_punctuality', 'char_task', 'char_ownup', 'char_curiosity', 'char_global', 'char_critical',
-                'char_verbal', 'char_listening', 'char_collab', 'char_challenges', 'char_adapt', 'char_emotional'
-            ];
-            const charLabelsFull = {
-                char_5s: '5S',
-                char_honesty: 'Integrity',
-                char_obedience: 'Integrity',
-                char_cheating: 'Integrity',
-                char_attendance: 'Responsibility',
-                char_punctuality: 'Responsibility',
-                char_task: 'Responsibility',
-                char_ownup: 'Responsibility',
-                char_curiosity: 'Knowledgeable',
-                char_global: 'Knowledgeable',
-                char_critical: 'Knowledgeable',
-                char_verbal: 'Communication',
-                char_listening: 'Communication',
-                char_collab: 'Communication',
-                char_challenges: 'Resilience',
-                char_adapt: 'Resilience',
-                char_emotional: 'Resilience'
-            };
-            const charAreas = {
-                char_5s: 'Senyum, Salam, Sapa, Sopan, Santun',
-                char_honesty: 'Honesty',
-                char_obedience: 'Obedience',
-                char_cheating: 'No cheating',
-                char_attendance: 'Attendance',
-                char_punctuality: 'Punctuality',
-                char_task: 'Task accomplishment',
-                char_ownup: 'Own-up mistakes',
-                char_curiosity: 'Curiosity',
-                char_global: 'General and global knowledge',
-                char_critical: 'Critical thinking',
-                char_verbal: 'Verbal communication',
-                char_listening: 'Active listening',
-                char_collab: 'Collaboration',
-                char_challenges: 'Facing Challenges',
-                char_adapt: 'Adaptation to change',
-                char_emotional: 'Emotional management'
-            };
-            const ratingMap = { 1: 'Needs Support', 2: 'Developing', 3: 'Good', 4: 'Excellent' };
-            let charRowsHTML = '';
-            charKeys.forEach(key => {
-                const val = charMap[key];
-                const label = ratingMap[val] || '—';
-                const display = val !== null && val !== undefined ? `${label}` : '—';
-                charRowsHTML += `<tr><td>${charLabelsFull[key]}</td><td>${charAreas[key]}</td><td>${display}</td></tr>`;
-            });
-            document.getElementById('exp_char_rows').innerHTML = charRowsHTML;
-            let charSum = 0,
-                charCount = 0;
-            Object.values(charMap).forEach(v => { if (v !== null && v !== undefined) { charSum += v;
-                    charCount++; } });
-            setText('exp_char_avg', charCount > 0 ? (charSum / charCount).toFixed(1) : '—');
-
-            // Page 6: Talent
-            const talentMap = r.talent || {};
-            const talentKeys = ['talent_club', 'talent_comp', 'talent_org', 'talent_events'];
-            const talentLabelsFull = {
-                talent_club: 'Club Participation & Commitment',
-                talent_comp: 'Competition Participation',
-                talent_org: 'Organization Participation',
-                talent_events: 'Events Participation'
-            };
-            const talentRatingMap = { 1: 'Needs Improvement', 2: 'Developing', 3: 'Good', 4: 'Excellent' };
-            let talentRowsHTML = '';
-            talentKeys.forEach(key => {
-                const val = talentMap[key];
-                const label = val !== null && val !== undefined ? talentRatingMap[val] || val : '—';
-                talentRowsHTML += `<tr><td>${talentLabelsFull[key]}</td><td>${label}</td></tr>`;
-            });
-            document.getElementById('exp_talent_rows').innerHTML = talentRowsHTML;
-            let talSum = 0,
-                talCount = 0;
-            talentKeys.forEach(k => {
-                if (talentMap[k] !== null && talentMap[k] !== undefined) { talSum += talentMap[k];
-                    talCount++; }
-            });
-            setText('exp_talent_avg', talCount > 0 ? (talSum / talCount).toFixed(1) : '—');
-
-            // Goals
-            const goals = talentMap.goals || {};
-            const goalLabels = ['Improved technical skills', 'Increased confidence', 'Active participation',
-                'Demonstrated personal growth'
-            ];
-            const goalStatusMap = { achieved: 'Achieved', progress: 'In Progress', need: 'Needs Improvement' };
-            let goalRowsHTML = '';
-            ['t_goal1', 't_goal2', 't_goal3', 't_goal4'].forEach((g, idx) => {
-                const val = goals[g];
-                const status = val ? goalStatusMap[val] || '—' : '—';
-                goalRowsHTML += `<tr><td>${idx+1}</td><td>${goalLabels[idx]}</td><td>${status}</td></tr>`;
-            });
-            document.getElementById('exp_goal_rows').innerHTML = goalRowsHTML;
-
-            // Achievements
-            const ach = talentMap.achievements || {}; 
-            const achLabels = ['Achievement 1', 'Achievement 2', 'Achievement 3', 'Achievement 4', 'Achievement 5',
-                'Achievement 6'
-            ];
-            let achRowsHTML = '';
-            ['ach1', 'ach2', 'ach3', 'ach4', 'ach5', 'ach6'].forEach((a, idx) => {
-                achRowsHTML += `<tr><td>${idx+1}</td><td>${achLabels[idx]}</td><td>${ach[a] || '—'}</td></tr>`;
-            });
-            document.getElementById('exp_ach_rows').innerHTML = achRowsHTML;
-
-            // Page 7: Observations
-            const obs = r.observations || {};
-            const bulletList = (text) => {
-                if (!text || text === '—') return '—';
-                return text.split('\n').filter(l => l.trim()).map(l => `• ${l.trim()}`).join('<br>');
-            };
-            setHTML('exp_obs_strengths', bulletList(obs.strengths));
-            setHTML('exp_obs_improvements', bulletList(obs.improvements));
-            setText('exp_obs_interventions', obs.interventions || '—');
-            const pc = r.parentComm || {};
-            setText('exp_pc_date', pc.date || '—');
-            setText('exp_pc_method', pc.method || '—');
-            setText('exp_pc_summary', pc.summary || '—');
-            setText('exp_action_plan', r.actionPlan || '—');
-
-            // Page 8: Term Summaries
-            const to = r.termOdd || {};
-            setText('exp_odd_academic', to.academic || '—');
-            setText('exp_odd_talent', to.talent || '—');
-            setText('exp_odd_char', to.character || '—');
-            setText('exp_odd_present', to.present || '0');
-            setText('exp_odd_absent', to.absent || '0');
-            setText('exp_odd_late', to.late || '0');
-            const oddP = parseInt(to.present) || 0,
-                oddA = parseInt(to.absent) || 0,
-                oddL = parseInt(to.late) || 0;
-            const oddTotal = oddP + oddA + oddL;
-            setText('exp_odd_pct', oddTotal > 0 ? ((oddP / oddTotal) * 100).toFixed(1) + '%' : '—');
-            setText('exp_odd_assessment', to.assessment || '—');
-            setText('exp_odd_interventions', (to.interventions || []).join(', ') || '—');
-            setText('exp_odd_meet_date', to.meetDate || '—');
-            setText('exp_odd_meet_points', to.meetPoints || '—');
-            setText('exp_odd_meet_actions', to.meetActions || '—');
-
-            const te = r.termEven || {};
-            setText('exp_even_academic', te.academic || '—');
-            setText('exp_even_talent', te.talent || '—');
-            setText('exp_even_char', te.character || '—');
-            setText('exp_even_present', te.present || '0');
-            setText('exp_even_absent', te.absent || '0');
-            setText('exp_even_late', te.late || '0');
-            const evenP = parseInt(te.present) || 0,
-                evenA = parseInt(te.absent) || 0,
-                evenL = parseInt(te.late) || 0;
-            const evenTotal = evenP + evenA + evenL;
-            setText('exp_even_pct', evenTotal > 0 ? ((evenP / evenTotal) * 100).toFixed(1) + '%' : '—');
-            setText('exp_even_assessment', te.assessment || '—');
-            setText('exp_even_interventions', (te.interventions || []).join(', ') || '—');
-            setText('exp_even_meet_date', te.meetDate || '—');
-            setText('exp_even_meet_points', te.meetPoints || '—');
-            setText('exp_even_meet_actions', te.meetActions || '—');
-
-            // Page 9: End of Year
-            const ye = r.yearEnd || {};
-            setText('exp_year_ach', ye.achievements || '—');
-            setText('exp_year_growth', ye.growth || '—');
-            setText('exp_year_recommend', ye.recommend || '—');
-
-            const sig = r.signatures || {};
-            setText('exp_sig_date', sig.date || '—');
-
-            // Insert signature images with name below
-            const sigMap = {
-                'exp_sig_ht_line': { data: sig.ht_sig, name: sig.ht || '' },
-                'exp_sig_aa_line': { data: sig.aa_sig, name: sig.aa || '' },
-                'exp_sig_ct_line': { data: sig.ct_sig, name: sig.ct || '' },
-                'exp_sig_principal_line': { data: sig.principal_sig, name: sig.principal || '' }
-            };
-            Object.keys(sigMap).forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    const data = sigMap[id].data;
-                    const name = sigMap[id].name;
-                    if (data) {
-                        el.innerHTML = `<img src="${data}" alt="Signature" style="max-height: 40px; max-width: 150px; object-fit: contain;" />`;
-                    } else {
-                        el.innerHTML = '';
-                    }
-                    // Set the name in the corresponding span
-                    const nameId = id.replace('_line', '_name');
-                    const nameEl = document.getElementById(nameId);
-                    if (nameEl) {
-                        nameEl.textContent = name || '—';
-                    }
-                }
-            });
-
-            // Generate PDF: capture each .pdf-page div separately
-            const pages = exp.querySelectorAll('.pdf-page');
-            const pdf = new window.jspdf.jsPDF('p', 'mm', 'a4');
-            let first = true;
-
-            const capturePage = (element, index) => {
-                return html2canvas(element, {
-                    scale: 2,
-                    useCORS: true,
-                    logging: false,
-                    backgroundColor: '#ffffff',
-                }).then(canvas => {
-                    const imgData = canvas.toDataURL('image/png');
-                    const pdfWidth = pdf.internal.pageSize.getWidth();
-                    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-                    if (!first) pdf.addPage();
-                    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-                    first = false;
-                });
-            };
-
-            let promise = Promise.resolve();
-            pages.forEach((page, idx) => {
-                promise = promise.then(() => capturePage(page, idx));
-            });
-
-            promise.then(() => {
-                pdf.save(`Student_Journal_${r.studentName || 'student'}.pdf`);
-                toast('PDF exported successfully!', 'success');
-            }).catch(err => {
-                console.error(err);
-                toast('Error generating PDF. Please try again.', 'error');
-            });
+        // Add a new page and reset Y
+        function pdfNewPage(pdf) {
+            pdf.addPage();
+                pdfY = PDF_MARGIN;
         }
 
+        // Ensure enough space; add new page if needed
+        function pdfCheckPage(pdf, neededHeight) {
+            if (pdfY + neededHeight > PDF_PAGE_HEIGHT - PDF_MARGIN) {
+                pdfNewPage(pdf);
+                }
+        }
+
+        // Draw centered text
+        function pdfCentered(pdf, text, fontSize, fontStyle, y) {
+            pdf.setFont('helvetica', fontStyle);
+            pdf.setFontSize(fontSize);
+            const w = pdf.getTextWidth(text);
+            pdf.text(text, (PDF_PAGE_WIDTH - w) / 2, y);
+        }
+
+        // Draw section heading (with underline)
+        function pdfSectionHeading(pdf, title) {
+            pdfCheckPage(pdf, 12);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(11);
+            pdf.setTextColor(15, 23, 42);
+            pdf.text(title, PDF_MARGIN, pdfY);
+                pdfY += 2;
+            pdf.setDrawColor(148, 163, 184);
+            pdf.setLineWidth(0.3);
+            pdf.line(PDF_MARGIN, pdfY, PDF_PAGE_WIDTH - PDF_MARGIN, pdfY);
+                pdfY += 5;
+        }
+
+        // Draw a labeled row: "Label : value" with word wrap
+        function pdfLabelValue(pdf, label, value, labelWidth = 55) {
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(9.5);
+            pdf.setTextColor(30, 41, 59);
+            pdf.text(label, PDF_MARGIN, pdfY);
+
+            pdf.setFont('helvetica', 'normal');
+                const valueX = PDF_MARGIN + labelWidth;
+                const maxWidth = PDF_CONTENT_WIDTH - labelWidth;
+                const lines = pdf.splitTextToSize(value || '—', maxWidth);
+                    pdf.text(lines, valueX, pdfY);
+                        pdfY += (lines.length * 4.5) + 1;
+        }
+
+// Draw a table (header + rows)
+function pdfTable(pdf, headers, rows, colWidths) {
+    const rowHeight = 6;
+    const headerHeight = 7;
+
+    // Check for space
+    pdfCheckPage(pdf, headerHeight + 5);
+
+    // Header
+    pdf.setFillColor(241, 245, 249);
+    pdf.setDrawColor(148, 163, 184);
+    pdf.setLineWidth(0.2);
+    pdf.rect(PDF_MARGIN, pdfY - 4, PDF_CONTENT_WIDTH, headerHeight, 'FD');
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(9);
+    pdf.setTextColor(30, 41, 59);
+    let x = PDF_MARGIN + 1;
+    headers.forEach((h, i) => {
+        pdf.text(h, x, pdfY);
+        x += colWidths[i];
+    });
+    pdfY += headerHeight;
+
+    // Rows
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(9);
+    rows.forEach((row, rowIdx) => {
+        pdfCheckPage(pdf, rowHeight);
+        // Alternate row background
+        if (rowIdx % 2 === 1) {
+            pdf.setFillColor(248, 250, 252);
+            pdf.rect(PDF_MARGIN, pdfY - 4, PDF_CONTENT_WIDTH, rowHeight, 'F');
+        }
+        // Border
+        pdf.setDrawColor(200, 210, 220);
+        pdf.rect(PDF_MARGIN, pdfY - 4, PDF_CONTENT_WIDTH, rowHeight, 'S');
+
+        x = PDF_MARGIN + 1;
+        row.forEach((cell, i) => {
+            const cellText = String(cell == null ? '—' : cell);
+            const lines = pdf.splitTextToSize(cellText, colWidths[i] - 2);
+            pdf.text(lines[0] || '—', x, pdfY);
+            x += colWidths[i];
+        });
+        pdfY += rowHeight;
+    });
+    pdfY += 2;
+}
+
+// Draw paragraph (multiline text with wrapping)
+function pdfParagraph(pdf, text) {
+    if (!text || text === '—') {
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(9.5);
+        pdf.setTextColor(100, 116, 139);
+        pdf.text('—', PDF_MARGIN, pdfY);
+        pdfY += 5;
+        return;
+    }
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(9.5);
+    pdf.setTextColor(30, 41, 59);
+    const lines = pdf.splitTextToSize(text, PDF_CONTENT_WIDTH);
+    pdfCheckPage(pdf, lines.length * 4.5);
+    pdf.text(lines, PDF_MARGIN, pdfY);
+    pdfY += (lines.length * 4.5) + 1;
+}
+
+// Bold paragraph label + content
+function pdfLabelParagraph(pdf, label, text) {
+    pdfCheckPage(pdf, 6);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(9.5);
+    pdf.setTextColor(30, 41, 59);
+    pdf.text(label, PDF_MARGIN, pdfY);
+    pdfY += 4.5;
+    pdfParagraph(pdf, text);
+}
+
+        function generatePDF(studentId) {
+    const r = allStudents[studentId];
+    if (!r) { toast('Student not found.', 'error'); return; }
+
+    // Create PDF (with compression)
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'mm', 'a4', true);
+
+    // Reset Y position
+    pdfY = PDF_MARGIN;
+
+    // ═══════════════════════════════════════════════════════
+    // PAGE 1: LETTERHEAD + STUDENT INFORMATION
+    // ═══════════════════════════════════════════════════════
+
+    // Yayasan
+    
+    pdfCentered(pdf, 'YAYASAN KREASI EDULAB INDONESIA', 10, 'bold', pdfY);
+    pdfY += 5;
+
+    // School name
+    pdfCentered(pdf, 'SEKOLAH MENENGAH ATAS EDU GLOBAL', 14, 'bold', pdfY);
+    pdfY += 5;
+
+    // Accreditation
+    pdf.setTextColor(30, 64, 175);
+    pdfCentered(pdf, 'TERAKREDITASI A | NPSN: 70031731', 9, 'normal', pdfY);
+    pdfY += 4;
+
+    // Address
+    pdf.setTextColor(71, 85, 105);
+    pdfCentered(pdf, 'Jalan Pembangunan No 1A Cirebon Telp. (0231) 8336900/8805889 Ext:6', 8, 'normal', pdfY);
+    pdfY += 3.5;
+
+    // Contact
+    pdfCentered(pdf, 'Website: www.eduqlobal.sch.id  Email: humas.egscirebon@gmail.com', 8, 'normal', pdfY);
+    pdfY += 4;
+
+    // Divider line
+    pdf.setDrawColor(30, 41, 59);
+    pdf.setLineWidth(0.6);
+    pdf.line(PDF_MARGIN, pdfY, PDF_PAGE_WIDTH - PDF_MARGIN, pdfY);
+    pdfY += 6;
+
+    // Document title
+    pdf.setTextColor(15, 23, 42);
+    pdfCentered(pdf, 'STUDENT DEVELOPMENT JOURNAL', 15, 'bold', pdfY);
+    pdfY += 5;
+    pdf.setTextColor(71, 85, 105);
+    pdfCentered(pdf, 'Teacher Observation & Progress Record', 10, 'normal', pdfY);
+    pdfY += 8;
+
+    // Academic Year / Grade
+    pdf.setTextColor(30, 41, 59);
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(9.5);
+    pdf.text(`Academic Year : ${r.academicYear || '________'}`, PDF_MARGIN, pdfY);
+    pdf.text(`Grade : ${r.grade || '________'}`, PDF_MARGIN + 90, pdfY);
+    pdfY += 5;
+    pdf.text(`Homeroom Teacher : ${r.homeroomTeacher || '________'}`, PDF_MARGIN, pdfY);
+    pdf.text(`Academic Advisor : ${r.academicAdvisor || '________'}`, PDF_MARGIN + 90, pdfY);
+    pdfY += 7;
+
+    // Student Information Table
+    pdfSectionHeading(pdf, 'Student Information');
+    const infoRows = [
+        ['Student Name', r.studentName || '—'],
+        ['Student ID No.', r.studentId || '—'],
+        ['Date of Birth', r.dob || '—'],
+        ['Grade', r.grade || '—'],
+        ['Parent/Guardian', r.parent || '—'],
+        ['Contact Number', r.contact || '—']
+    ];
+    infoRows.forEach(([label, value]) => pdfLabelValue(pdf, label, value, 55));
+
+    // ═══════════════════════════════════════════════════════
+    // PAGE 2: STUDENT PROFILE
+    // ═══════════════════════════════════════════════════════
+    pdfNewPage(pdf);
+
+    pdfSectionHeading(pdf, 'Student Profile (Completed Once)');
+    pdfLabelParagraph(pdf, 'Learning Strengths', r.strengths);
+    pdfLabelParagraph(pdf, 'Areas for Development', r.areas);
+    pdfLabelParagraph(pdf, 'Learning Preferences', r.preferences);
+    pdfLabelParagraph(pdf, 'Additional Support Required', r.support);
+
+    // ═══════════════════════════════════════════════════════
+    // PAGE 3: CAREER & MAJOR
+    // ═══════════════════════════════════════════════════════
+    pdfNewPage(pdf);
+
+    pdfSectionHeading(pdf, 'Monthly Development Record');
+    pdfLabelValue(pdf, 'Month', r.month || 'July 2026', 55);
+    pdfLabelParagraph(pdf, "Student's Career Aspiration", r.career);
+    pdfLabelParagraph(pdf, "Student's Desired Major & University", r.major);
+
+    // ═══════════════════════════════════════════════════════
+    // PAGE 4: ACADEMIC PROGRESS
+    // ═══════════════════════════════════════════════════════
+    pdfNewPage(pdf);
+
+    pdfSectionHeading(pdf, 'Academic Progress');
+    const ac = r.academic || {};
+    const acRows = SUBJECTS.map(subj => [subj.label, gradeLetter(ac[subj.id])]);
+    pdfTable(pdf, ['Subject', 'Grade'], acRows, [130, 40]);
+
+    pdfY += 2;
+    pdfLabelParagraph(pdf, 'Notes', ac.notes);
+
+    // Grade scale
+    pdfY += 2;
+    pdf.setFont('helvetica', 'italic');
+    pdf.setFontSize(8.5);
+    pdf.setTextColor(100, 116, 139);
+    pdf.text('Grade Scale: A = 92–100, B = 84–91, C = 75–83, D = below 75', PDF_MARGIN, pdfY);
+    pdfY += 6;
+
+    // ═══════════════════════════════════════════════════════
+    // PAGE 5: CHARACTER BUILDING
+    // ═══════════════════════════════════════════════════════
+    pdfNewPage(pdf);
+
+    pdfSectionHeading(pdf, 'Character Building');
+    const charMap = r.character || {};
+    const ratingMap = { 1: 'Needs Support', 2: 'Developing', 3: 'Good', 4: 'Excellent' };
+    const charRows = [
+        ['5S', 'Senyum, Salam, Sapa, Sopan, Santun', ratingMap[charMap.char_5s] || '—'],
+        ['Integrity', 'Honesty', ratingMap[charMap.char_honesty] || '—'],
+        ['Integrity', 'Obedience', ratingMap[charMap.char_obedience] || '—'],
+        ['Integrity', 'No cheating', ratingMap[charMap.char_cheating] || '—'],
+        ['Responsibility', 'Attendance', ratingMap[charMap.char_attendance] || '—'],
+        ['Responsibility', 'Punctuality', ratingMap[charMap.char_punctuality] || '—'],
+        ['Responsibility', 'Task accomplishment', ratingMap[charMap.char_task] || '—'],
+        ['Responsibility', 'Own-up mistakes', ratingMap[charMap.char_ownup] || '—'],
+        ['Knowledgeable', 'Curiosity', ratingMap[charMap.char_curiosity] || '—'],
+        ['Knowledgeable', 'General and global knowledge', ratingMap[charMap.char_global] || '—'],
+        ['Knowledgeable', 'Critical thinking', ratingMap[charMap.char_critical] || '—'],
+        ['Communication', 'Verbal communication', ratingMap[charMap.char_verbal] || '—'],
+        ['Communication', 'Active listening', ratingMap[charMap.char_listening] || '—'],
+        ['Communication', 'Collaboration', ratingMap[charMap.char_collab] || '—'],
+        ['Resilience', 'Facing Challenges', ratingMap[charMap.char_challenges] || '—'],
+        ['Resilience', 'Adaptation to change', ratingMap[charMap.char_adapt] || '—'],
+        ['Resilience', 'Emotional management', ratingMap[charMap.char_emotional] || '—']
+    ];
+    pdfTable(pdf, ['Character', 'Area', 'Rating'], charRows, [35, 100, 35]);
+
+    // Average
+    let charSum = 0, charCount = 0;
+    Object.values(charMap).forEach(v => { if (v !== null && v !== undefined) { charSum += v; charCount++; } });
+    pdfY += 2;
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(10);
+    pdf.setTextColor(15, 23, 42);
+    pdf.text(`Average Score: ${charCount > 0 ? (charSum / charCount).toFixed(1) : '—'}/4`, PDF_MARGIN, pdfY);
+    pdfY += 6;
+
+    // ═══════════════════════════════════════════════════════
+    // PAGE 6: TALENT DEVELOPMENT & ACHIEVEMENTS
+    // ═══════════════════════════════════════════════════════
+    pdfNewPage(pdf);
+
+    pdfSectionHeading(pdf, 'Talent Development');
+    const talentMap = r.talent || {};
+    const talentRatingMap = { 1: 'Needs Improvement', 2: 'Developing', 3: 'Good', 4: 'Excellent' };
+    const talentRows = [
+        ['Club Participation & Commitment', talentRatingMap[talentMap.talent_club] || '—'],
+        ['Competition Participation', talentRatingMap[talentMap.talent_comp] || '—'],
+        ['Organization Participation', talentRatingMap[talentMap.talent_org] || '—'],
+        ['Events Participation', talentRatingMap[talentMap.talent_events] || '—']
+    ];
+    pdfTable(pdf, ['Area', 'Rating'], talentRows, [130, 40]);
+
+    let talSum = 0, talCount = 0;
+    ['talent_club', 'talent_comp', 'talent_org', 'talent_events'].forEach(k => {
+        if (talentMap[k] !== null && talentMap[k] !== undefined) { talSum += talentMap[k]; talCount++; }
+    });
+    pdfY += 2;
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(10);
+    pdf.setTextColor(15, 23, 42);
+    pdf.text(`Average Score: ${talCount > 0 ? (talSum / talCount).toFixed(1) : '—'}/4`, PDF_MARGIN, pdfY);
+    pdfY += 7;
+
+    // Talent Achievements (Goals)
+    pdfSectionHeading(pdf, 'Talent Achievements');
+    const goals = talentMap.goals || {};
+    const goalLabels = ['Improved technical skills', 'Increased confidence', 'Active participation', 'Demonstrated personal growth'];
+    const goalStatusMap = { achieved: 'Achieved', progress: 'In Progress', need: 'Needs Improvement' };
+    const goalRows = goalLabels.map((g, i) => [
+        String(i + 1),
+        g,
+        goalStatusMap[goals['t_goal' + (i + 1)]] || '—'
+    ]);
+    pdfTable(pdf, ['No.', 'Goal', 'Status'], goalRows, [15, 105, 50]);
+
+    // Achievements Table
+    pdfY += 2;
+    const ach = talentMap.achievements || {};
+    const achLabels = ['Best Student', 'Best English Speaker', 'Competitions', 'Organization', 'Seminar/Workshop', 'Other'];
+    const achRows = achLabels.map((label, i) => [String(i + 1), label, ach['ach' + (i + 1)] || '—']);
+    pdfTable(pdf, ['No.', 'Activity', 'Achievement'], achRows, [15, 60, 95]);
+
+    // ═══════════════════════════════════════════════════════
+    // PAGE 7: TEACHER'S OBSERVATIONS
+    // ═══════════════════════════════════════════════════════
+    pdfNewPage(pdf);
+
+    pdfSectionHeading(pdf, "Teacher's Observations");
+    const obs = r.observations || {};
+    pdfLabelParagraph(pdf, 'Strengths Demonstrated', obs.strengths);
+    pdfLabelParagraph(pdf, 'Areas Requiring Improvement', obs.improvements);
+    pdfLabelParagraph(pdf, 'Interventions/Support Provided', obs.interventions);
+
+    // Parent Communication
+    pdfSectionHeading(pdf, 'Parent Communication');
+    const pc = r.parentComm || {};
+    const pcRows = [[pc.date || '—', pc.method || '—', pc.summary || '—']];
+    pdfTable(pdf, ['Date', 'Method', 'Summary'], pcRows, [35, 35, 100]);
+
+    pdfLabelParagraph(pdf, 'Action Plan for Next Month', r.actionPlan);
+
+    // ═══════════════════════════════════════════════════════
+    // PAGE 8: TERM SUMMARIES
+    // ═══════════════════════════════════════════════════════
+    pdfNewPage(pdf);
+
+    pdfSectionHeading(pdf, 'Term Summary (Odd)');
+    const to = r.termOdd || {};
+    pdfLabelParagraph(pdf, 'Academic Performance', to.academic);
+    pdfLabelParagraph(pdf, 'Talent Development', to.talent);
+    pdfLabelParagraph(pdf, 'Character Building', to.character);
+
+    // Attendance
+    const oddP = parseInt(to.present) || 0, oddA = parseInt(to.absent) || 0, oddL = parseInt(to.late) || 0;
+    const oddTotal = oddP + oddA + oddL;
+    pdfLabelValue(pdf, 'Attendance',
+        `Present: ${oddP} | Absent: ${oddA} | Late: ${oddL} | Percentage: ${oddTotal > 0 ? ((oddP / oddTotal) * 100).toFixed(1) + '%' : '—'}`,
+        40);
+
+    pdfLabelParagraph(pdf, "Teacher's Overall Assessment", to.assessment);
+    pdfLabelParagraph(pdf, 'Recommended Interventions', (to.interventions || []).join(', '));
+    pdfY += 2;
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(9.5);
+    pdf.setTextColor(30, 41, 59);
+    pdf.text('Parent Meeting Record:', PDF_MARGIN, pdfY);
+    pdfY += 5;
+    pdfLabelValue(pdf, 'Date', to.meetDate, 40);
+    pdfLabelParagraph(pdf, 'Key Points', to.meetPoints);
+    pdfLabelParagraph(pdf, 'Agreed Actions', to.meetActions);
+
+    // Even Term
+    pdfY += 4;
+    pdfSectionHeading(pdf, 'Term Summary (Even)');
+    const te = r.termEven || {};
+    pdfLabelParagraph(pdf, 'Academic Performance', te.academic);
+    pdfLabelParagraph(pdf, 'Talent Development', te.talent);
+    pdfLabelParagraph(pdf, 'Character Building', te.character);
+
+    const evenP = parseInt(te.present) || 0, evenA = parseInt(te.absent) || 0, evenL = parseInt(te.late) || 0;
+    const evenTotal = evenP + evenA + evenL;
+    pdfLabelValue(pdf, 'Attendance',
+        `Present: ${evenP} | Absent: ${evenA} | Late: ${evenL} | Percentage: ${evenTotal > 0 ? ((evenP / evenTotal) * 100).toFixed(1) + '%' : '—'}`,
+        40);
+
+    pdfLabelParagraph(pdf, "Counselling Teacher's Overall Assessment", te.assessment);
+    pdfLabelParagraph(pdf, 'Recommended Interventions', (te.interventions || []).join(', '));
+    pdfY += 2;
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(9.5);
+    pdf.setTextColor(30, 41, 59);
+    pdf.text('Parent Meeting Record:', PDF_MARGIN, pdfY);
+    pdfY += 5;
+    pdfLabelValue(pdf, 'Date', te.meetDate, 40);
+    pdfLabelParagraph(pdf, 'Key Points', te.meetPoints);
+    pdfLabelParagraph(pdf, 'Agreed Actions', te.meetActions);
+
+    // ═══════════════════════════════════════════════════════
+    // PAGE 9: END-OF-YEAR SUMMARY + SIGNATURES
+    // ═══════════════════════════════════════════════════════
+    pdfNewPage(pdf);
+
+    pdfSectionHeading(pdf, 'End-of-Year Summary');
+    const ye = r.yearEnd || {};
+    pdfLabelParagraph(pdf, 'Major Achievements', ye.achievements);
+    pdfLabelParagraph(pdf, 'Significant Areas of Growth', ye.growth);
+    pdfLabelParagraph(pdf, 'Recommendations for Next Grade', ye.recommend);
+
+    // Signature area
+    pdfY += 6;
+    const sig = r.signatures || {};
+    const sigY = pdfY;
+
+    // Four signature columns
+    const colWidth = PDF_CONTENT_WIDTH / 4;
+    const sigItems = [
+        { name: sig.ht || '', image: sig.ht_sig, label: 'Homeroom Teacher' },
+        { name: sig.aa || '', image: sig.aa_sig, label: 'Academic Advisor' },
+        { name: sig.ct || '', image: sig.ct_sig, label: 'Counselling Teacher' },
+        { name: sig.principal || '', image: sig.principal_sig, label: 'Head Teacher/Principal' }
+    ];
+
+    sigItems.forEach((item, i) => {
+        const x = PDF_MARGIN + (i * colWidth);
+        const centerX = x + (colWidth / 2);
+
+        // Signature image (if present)
+        if (item.image) {
+            try {
+                // Determine image format from base64
+                let format = 'PNG';
+                if (item.image.includes('data:image/jpeg') || item.image.includes('data:image/jpg')) {
+                    format = 'JPEG';
+                }
+                pdf.addImage(item.image, format, centerX - 12, sigY, 24, 12);
+            } catch (e) {
+                console.warn('Could not embed signature:', e);
+            }
+        }
+
+        // Signature line
+        const lineY = sigY + 14;
+        pdf.setDrawColor(30, 41, 59);
+        pdf.setLineWidth(0.2);
+        pdf.line(x + 3, lineY, x + colWidth - 3, lineY);
+
+        // Name
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(9);
+        pdf.setTextColor(15, 23, 42);
+        const nameText = item.name || '_________________';
+        const nameW = pdf.getTextWidth(nameText);
+        pdf.text(nameText, centerX - (nameW / 2), lineY + 5);
+
+        // Role label
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(8);
+        pdf.setTextColor(71, 85, 105);
+        const roleW = pdf.getTextWidth(item.label);
+        pdf.text(item.label, centerX - (roleW / 2), lineY + 10);
+    });
+
+    // Date at bottom
+    pdfY = sigY + 30;
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(9.5);
+    pdf.setTextColor(30, 41, 59);
+    pdf.text(`Signature : ____________________`, PDF_MARGIN, pdfY);
+    pdf.text(`Date : ${sig.date || '—'}`, PDF_MARGIN + 90, pdfY);
+
+    // ═══════════════════════════════════════════════════════
+    // SAVE
+    // ═══════════════════════════════════════════════════════
+    pdf.save(`Student_Journal_${r.studentName || 'student'}.pdf`);
+    toast('PDF exported successfully!', 'success');
+}
         // ─── NAVIGATION ───
         function navigateTo(view) {
             document.querySelectorAll('.view-content').forEach(el => el.style.display = 'none');
