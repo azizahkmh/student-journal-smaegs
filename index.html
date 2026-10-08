@@ -2841,7 +2841,7 @@ pdfY += 6; // ← extra space after Student Information
     // Achievements Table
     pdfY += 2;
     const ach = talentMap.achievements || {};
-    const achLabels = ['Best Student', 'Best English Speaker', 'Competitions', 'Organization', 'Seminar/Workshop', 'Other'];
+    const achLabels = ['Achievement 1', 'Achievement 2', 'Achievement 3', 'Achievement 4', 'Achievement 5', 'Achievement 6'];
     const achRows = achLabels.map((label, i) => [String(i + 1), label, ach['ach' + (i + 1)] || '—']);
     pdfTable(pdf, ['No.', 'Activity', 'Achievement'], achRows, [15, 60, 95]);
 
